@@ -1,47 +1,140 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=1080, height=1920, initial-scale=1.0">
+<title>Overlay StreamChamp</title>
+
 <style>
-body {
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap');
+
+html, body {
   margin: 0;
+  padding: 0;
+  width: 1080px;
+  height: 1920px;
   background: transparent;
-  width: 1920px;
-  height: 600px;
   overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+}
+
+/* ===== TOP TEXT ===== */
+.top-left, .top-right {
+  position: absolute;
+  top: 40px;
+  font-size: 26px;
+  font-weight: 600;
+  color: white;
+  animation: fadeSlide 3s ease-in-out infinite alternate;
+}
+
+.top-left {
+  left: 40px;
+}
+
+.top-right {
+  right: 40px;
+  text-align: right;
+}
+
+/* ICON ROW */
+.social {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+/* ===== CENTER BAR ===== */
+.overlay {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+  height: 70px;
+}
+
+.move {
+  position: absolute;
+  width: 200%;
+  height: 100%;
+  animation: slide 6s linear infinite;
 }
 
 .bar {
-  position: absolute;
-  bottom: 0;
-  width: 1920px;
-  height: 120px;
-  background: transparent;
   display: flex;
-  align-items: center;
-  overflow: hidden;
+  height: 100%;
 }
 
-.text {
-  white-space: nowrap;
-  font-size: 48px;
-  font-weight: <strong> bold;
-  color: white;
-  animation: jalan 12s linear infinite;
+.blue {
+  width: 50%;
+  background: #2fa4ff;
+  clip-path: polygon(0 0, 95% 0, 100% 50%, 95% 100%, 0 100%);
 }
 
-@keyframes jalan {
-  from { transform: translateX(-100%); }
-  to { transform: translateX(100%); }
+.yellow {
+  width: 50%;
+  background: #f6d77a;
+  clip-path: polygon(5% 0, 100% 0, 100% 100%, 5% 100%, 0 50%);
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0.6; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===== ICON SVG ===== */
+.icon {
+  width: 22px;
+  height: 22px;
 }
 </style>
 </head>
 
 <body>
-  <div class="bar">
-    <div class="text">
-      FOLLOW • LIKE • SUBSCRIBE • @IDOYYY_
+
+<!-- TOP LEFT -->
+<div class="top-left">
+  RIDHO YUNUS
+</div>
+
+<!-- TOP RIGHT -->
+<div class="top-right">
+  <div class="social">
+    <!-- Instagram -->
+    <svg class="icon" viewBox="0 0 24 24" fill="white">
+      <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm5 5a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm6.5-.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+    </svg>
+    @1DOYYYS_
+  </div>
+
+  <div class="social">
+    <!-- TikTok -->
+    <svg class="icon" viewBox="0 0 24 24" fill="white">
+      <path d="M16 3a5 5 0 0 0 5 5v3a8 8 0 0 1-5-1.6V15a6 6 0 1 1-6-6v3a3 3 0 1 0 3 3V3z"/>
+    </svg>
+    @DHO_YNS
+  </div>
+</div>
+
+<!-- CENTER BAR -->
+<div class="overlay">
+  <div class="move">
+    <div class="bar">
+      <div class="blue"></div>
+      <div class="yellow"></div>
+      <div class="blue"></div>
+      <div class="yellow"></div>
     </div>
   </div>
+</div>
+
 </body>
 </html>
