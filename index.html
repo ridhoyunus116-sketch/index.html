@@ -1,28 +1,99 @@
-QT += quick widgets quickwidgets webenginequick
-CONFIG += c++17
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Game Stream Overlay</title>
 
-SOURCES += main.cpp \
-	overlay.cpp \
-	systray.cpp \
-	configuredialogue.cpp
+<!-- Font -->
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
 
-HEADERS += overlay.h \
-	systray.h \
-	configuredialogue.h
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-RESOURCES += qml.qrc
+body {
+  background: transparent;
+  overflow: hidden;
+  font-family: 'Orbitron', sans-serif;
+}
 
-DISTFILES += qml/skeleton.qml \
-	qml/AboutOAuth2.qml \
-	qml/Chatter.qml \
-	qml/FileDialogueWrapper.qml \
-	qml/Handle.qml \
-	qml/Repositioner.qml \
-	qml/StylePreview.qml \
-	qml/TextSlider.qml \
-	qml/ToonLabel.qml \
-	qml/TwitchLogin.qml \
-	qml/configure.qml \
-	qml/dragtest.qml \
-	qml/main.qml \
-	qml/twitch.js
+/* ====== NAME (TOP LEFT) ====== */
+.name-box {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  padding: 12px 22px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #00f7ff, #0066ff);
+  color: white;
+  font-size: 22px;
+  font-weight: 700;
+  box-shadow: 0 0 20px #00f7ff;
+  animation: slideInLeft 1s ease-out;
+}
+
+/* ====== SOCIAL (TOP RIGHT) ====== */
+.social-box {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 14px;
+  animation: slideInRight 1s ease-out;
+}
+
+.social {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  font-size: 14px;
+  box-shadow: 0 0 15px rgba(0,247,255,0.6);
+}
+
+.social img {
+  width: 20px;
+  height: 20px;
+}
+
+/* ====== ANIMATIONS ====== */
+@keyframes slideInLeft {
+  from { transform: translateX(-200px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(200px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAMA STREAMER -->
+<div class="name-box">
+  RIDHO YUNUS
+</div>
+
+<!-- SOSIAL MEDIA -->
+<div class="social-box">
+  <div class="social">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png">
+    @1DOYYYS_
+  </div>
+
+  <div class="social">
+    <img src="https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg">
+    @DHO_YNS
+  </div>
+</div>
+
+</body>
+</html>
