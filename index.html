@@ -1,11 +1,8 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Game Stream Overlay</title>
-
-<!-- Font -->
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+<title>Purple Chaos IG Overlay</title>
 
 <style>
 * {
@@ -17,83 +14,127 @@
 body {
   background: transparent;
   overflow: hidden;
-  font-family: 'Orbitron', sans-serif;
+  font-family: 'Segoe UI', sans-serif;
 }
 
-/* ====== NAME (TOP LEFT) ====== */
-.name-box {
+/* LANDSCAPE BANNER */
+.banner {
+  position: fixed;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 820px;
+  height: 80px;
+  border-radius: 18px;
+  background: rgba(15, 0, 30, 0.65);
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 35px rgba(170, 90, 255, 0.6);
+}
+
+/* CHAOS LINES */
+.line {
   position: absolute;
-  top: 20px;
-  left: 20px;
-  padding: 12px 22px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #00f7ff, #0066ff);
-  color: white;
-  font-size: 22px;
-  font-weight: 700;
-  box-shadow: 0 0 20px #00f7ff;
-  animation: slideInLeft 1s ease-out;
+  width: 160%;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #c77dff, transparent);
+  filter: blur(1.2px);
+  opacity: 0.75;
+  animation-name: chaosMove;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 
-/* ====== SOCIAL (TOP RIGHT) ====== */
-.social-box {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  display: flex;
-  gap: 14px;
-  animation: slideInRight 1s ease-out;
+@keyframes chaosMove {
+  from {
+    transform: translateX(-60%) rotate(var(--rot));
+  }
+  to {
+    transform: translateX(60%) rotate(calc(var(--rot) * -1));
+  }
 }
 
-.social {
+/* CONTENT */
+.content {
+  position: relative;
+  z-index: 10;
+  height: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border-radius: 10px;
-  background: rgba(0,0,0,0.6);
-  color: white;
-  font-size: 14px;
-  box-shadow: 0 0 15px rgba(0,247,255,0.6);
+  gap: 16px;
+  padding: 0 26px;
 }
 
-.social img {
-  width: 20px;
-  height: 20px;
+/* INSTAGRAM LOGO */
+.ig {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: radial-gradient(circle at 30% 30%, #ff8cff, #7a00ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 18px #9d4edd;
 }
 
-/* ====== ANIMATIONS ====== */
-@keyframes slideInLeft {
-  from { transform: translateX(-200px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+.ig svg {
+  width: 24px;
+  fill: white;
 }
 
-@keyframes slideInRight {
-  from { transform: translateX(200px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+/* TEXT LOOP */
+.text {
+  color: #f5e9ff;
+  font-size: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+  animation: textLoop 6s ease-in-out infinite;
+  text-shadow: 0 0 12px #c77dff;
+}
+
+@keyframes textLoop {
+  0%   { opacity: 0; transform: translateX(-50px); }
+  20%  { opacity: 1; transform: translateX(0); }
+  70%  { opacity: 1; transform: translateX(0); }
+  100% { opacity: 0; transform: translateX(50px); }
 }
 </style>
 </head>
 
 <body>
 
-<!-- NAMA STREAMER -->
-<div class="name-box">
-  RIDHO YUNUS
-</div>
+<div class="banner" id="banner">
 
-<!-- SOSIAL MEDIA -->
-<div class="social-box">
-  <div class="social">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png">
-    @1DOYYYS_
+  <div class="content">
+    <div class="ig">
+      <svg viewBox="0 0 448 512">
+        <path d="M224.1 141c-63.6 0-114.9 51.3-114.9 114.9s51.3 114.9 114.9 114.9 114.9-51.3 114.9-114.9S287.7 141 224.1 141zm0 189.6c-41.2 0-74.7-33.5-74.7-74.7s33.5-74.7 74.7-74.7 74.7 33.5 74.7 74.7-33.5 74.7-74.7 74.7z"/>
+      </svg>
+    </div>
+    <div class="text">@1doyyys_</div>
   </div>
 
-  <div class="social">
-    <img src="https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg">
-    @DHO_YNS
-  </div>
 </div>
+
+<script>
+const banner = document.getElementById("banner");
+
+// generate chaos lines
+for (let i = 0; i < 14; i++) {
+  const line = document.createElement("div");
+  line.className = "line";
+
+  const top = Math.random() * 100;
+  const dur = 3 + Math.random() * 5;
+  const rot = (Math.random() * 8 - 4).toFixed(2);
+
+  line.style.top = top + "%";
+  line.style.animationDuration = dur + "s";
+  line.style.setProperty("--rot", rot + "deg");
+
+  banner.appendChild(line);
+}
+</script>
 
 </body>
 </html>
