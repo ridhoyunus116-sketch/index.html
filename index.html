@@ -2,83 +2,71 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>StreamChamp Compressor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { 
-            background: transparent; 
-            color: #00ff00; 
-            font-family: 'Courier New', Courier, monospace;
-            display: flex; 
-            flex-direction: column;
-            align-items: center; 
-            justify-content: center; 
-            height: 100vh; 
-            margin: 0;
-            overflow: hidden;
-        }
-        #status { font-size: 10px; margin-bottom: 5px; text-shadow: 1px 1px 2px black; }
-        canvas { width: 200px; height: 40px; border-radius: 5px; background: rgba(0,0,0,0.3); }
+        body { background: #111; color: #0f0; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        #btn { width: 80%; padding: 30px; border: 3px solid #0f0; background: #222; color: #0f0; font-weight: bold; border-radius: 15px; cursor: pointer; text-align: center; font-size: 18px; }
+        canvas { width: 90%; height: 120px; margin-top: 20px; background: #000; border: 1px solid #333; }
     </style>
 </head>
 <body>
-    <div id="status">CLICK TO ACTIVATE MIC</div>
-    <canvas id="visualizer"></canvas>
+    <div id="btn">TAP DISINI UNTUK AKTIFKAN MIC</div>
+    <canvas id="viz"></canvas>
 
     <script>
-        const canvas = document.getElementById('visualizer');
-        const canvasCtx = canvas.getContext('2d');
-        const statusDiv = document.getElementById('status');
+        const btn = document.getElementById('btn');
+        const canvas = document.getElementById('viz');
+        const ctx = canvas.getContext('2d');
 
-        async function initAudio() {
+        async function start() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const source = audioContext.createMediaStreamSource(stream);
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false } 
+                });
                 
-                // --- KODE COMPRESSOR ---
-                const compressor = audioContext.createDynamicsCompressor();
-                compressor.threshold.setValueAtTime(-25, audioContext.currentTime); // Mulai tekan di -25dB
-                compressor.ratio.setValueAtTime(15, audioContext.currentTime);      // Tekan sekuat 15x
-                compressor.knee.setValueAtTime(30, audioContext.currentTime);
-                compressor.attack.setValueAtTime(0.003, audioContext.currentTime);
-                compressor.release.setValueAtTime(0.25, audioContext.currentTime);
-
-                // --- ANALYSER (Untuk Visualizer) ---
-                const analyser = audioContext.createAnalyser();
-                analyser.fftSize = 256;
-                const bufferLength = analyser.frequencyBinCount;
-                const dataArray = new Uint8Array(bufferLength);
-
-                // Hubungkan: Mic -> Compressor -> Analyser -> Output
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioCtx.createMediaStreamSource(stream);
+                
+                // Compressor
+                const compressor = audioCtx.createDynamicsCompressor();
+                compressor.threshold.setValueAtTime(-25, audioCtx.currentTime);
+                compressor.ratio.setValueAtTime(12, audioCtx.currentTime);
+                
+                // Analyser (Visualizer)
+                const analyser = audioCtx.createAnalyser();
+                analyser.fftSize = 64; // Kecil saja biar ringan
+                
+                // HUBUNGKAN
                 source.connect(compressor);
                 compressor.connect(analyser);
-                analyser.connect(audioContext.destination);
+                // JANGAN hubungkan ke destination (audioCtx.destination) agar tidak gema/blok
+                
+                btn.innerText = "MIC AKTIF & COMPRESSED";
+                btn.style.borderColor = "#fff";
+                btn.style.color = "#fff";
 
-                statusDiv.innerText = "COMPRESSOR: ON (LEVEL 6 READY)";
-                statusDiv.style.color = "#00ff00";
-
+                const dataArray = new Uint8Array(analyser.frequencyBinCount);
                 function draw() {
                     requestAnimationFrame(draw);
                     analyser.getByteFrequencyData(dataArray);
-                    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-                    
-                    let barWidth = (canvas.width / bufferLength) * 2.5;
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
                     let x = 0;
-
-                    for(let i = 0; i < bufferLength; i++) {
-                        let barHeight = dataArray[i]/4;
-                        canvasCtx.fillStyle = `rgb(0, ${barHeight + 100}, 0)`;
-                        canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-                        x += barWidth + 1;
+                    for (let i = 0; i < dataArray.length; i++) {
+                        let h = dataArray[i] / 2;
+                        ctx.fillStyle = '#0f0';
+                        ctx.fillRect(x, canvas.height - h, 5, h);
+                        x += 8;
                     }
                 }
                 draw();
+                audioCtx.resume();
             } catch (err) {
-                statusDiv.innerText = "ERROR: " + err.message;
+                btn.innerText = "ERROR: " + err.name;
+                console.error(err);
             }
         }
 
-        window.addEventListener('click', initAudio, { once: true });
+        btn.addEventListener('click', start, { once: true });
     </script>
 </body>
 </html>
