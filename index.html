@@ -1,188 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&display=swap" rel="stylesheet">
-
-<style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
-
-/* =====================
-   BANNER
-===================== */
-.banner{
-  position:relative;
-  width:100vw;
-  height:200px;
-  overflow:hidden;
-
-  background:
-  linear-gradient(90deg,#0a0014,#120020,#0a0014);
-
-  font-family:'Orbitron', sans-serif;
-}
-
-/* =====================
-   SMOOTH LOOPING BORDER
-===================== */
-.banner::before{
-  content:"";
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:7px;
-
-  background:linear-gradient(
-    90deg,
-    #2b004d,
-    #4c007d,
-    #7a00ff,
-    #c77dff,
-    #7a00ff,
-    #4c007d,
-    #2b004d
-  );
-
-  background-size:300% 100%;
-  animation:flowLoop 6s linear infinite,
-             energyPulse 3s ease-in-out infinite;
-
-  box-shadow:
-    0 0 10px #7a00ff,
-    0 0 20px #9d4edd,
-    0 0 40px #c77dff;
-
-  z-index:10;
-}
-
-/* Gerakan utama (loop mulus) */
-@keyframes flowLoop{
-  0%{
-    background-position:0% 0;
-  }
-  100%{
-    background-position:300% 0;
-  }
-}
-
-/* Energy pulse halus */
-@keyframes energyPulse{
-  0%,100%{
-    filter:brightness(1);
-    box-shadow:
-      0 0 10px #7a00ff,
-      0 0 20px #9d4edd,
-      0 0 40px #c77dff;
-  }
-  50%{
-    filter:brightness(1.3);
-    box-shadow:
-      0 0 15px #9d4edd,
-      0 0 35px #c77dff,
-      0 0 70px #7a00ff;
-  }
-}
-
-/* =====================
-   CHAOS LINES
-===================== */
-.line{
-  position:absolute;
-  width:200%;
-  height:2px;
-  background:linear-gradient(90deg,transparent,#9d4edd,transparent);
-  opacity:.25;
-  animation:move linear infinite;
-  transform:rotate(var(--rot));
-}
-
-@keyframes move{
-  from{left:-100%;}
-  to{left:100%;}
-}
-
-/* =====================
-   TEXT
-===================== */
-.text{
-  position:absolute;
-  right:60px;
-  top:50%;
-  transform:translateY(-50%);
-
-  font-size:48px;
-  font-weight:700;
-
-  color:#fff;
-  letter-spacing:2px;
-
-  text-shadow:
-    0 0 10px #c77dff,
-    0 0 30px #9d4edd,
-    0 0 60px #7a00ff;
-
-  animation:rightSlide 6s ease-in-out infinite;
-}
-
-@keyframes rightSlide{
-  0%{
-    opacity:0;
-    transform:translate(120px,-50%);
-  }
-  20%{
-    opacity:1;
-    transform:translate(0,-50%);
-  }
-  80%{
-    opacity:1;
-    transform:translate(0,-50%);
-  }
-  100%{
-    opacity:0;
-    transform:translate(120px,-50%);
-  }
-}
-
-@media(max-width:768px){
-  .text{
-    font-size:28px;
-    right:20px;
-  }
-}
-</style>
+    <meta charset="UTF-8">
+    <title>StreamChamp Compressor</title>
+    <style>
+        body { 
+            background: transparent; 
+            color: #00ff00; 
+            font-family: 'Courier New', Courier, monospace;
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0;
+            overflow: hidden;
+        }
+        #status { font-size: 10px; margin-bottom: 5px; text-shadow: 1px 1px 2px black; }
+        canvas { width: 200px; height: 40px; border-radius: 5px; background: rgba(0,0,0,0.3); }
+    </style>
 </head>
-
 <body>
+    <div id="status">CLICK TO ACTIVATE MIC</div>
+    <canvas id="visualizer"></canvas>
 
-<div class="banner" id="banner">
-  <div class="text">@1doyyys_</div>
-</div>
+    <script>
+        const canvas = document.getElementById('visualizer');
+        const canvasCtx = canvas.getContext('2d');
+        const statusDiv = document.getElementById('status');
 
-<script>
-const banner = document.getElementById("banner");
+        async function initAudio() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const source = audioContext.createMediaStreamSource(stream);
+                
+                // --- KODE COMPRESSOR ---
+                const compressor = audioContext.createDynamicsCompressor();
+                compressor.threshold.setValueAtTime(-25, audioContext.currentTime); // Mulai tekan di -25dB
+                compressor.ratio.setValueAtTime(15, audioContext.currentTime);      // Tekan sekuat 15x
+                compressor.knee.setValueAtTime(30, audioContext.currentTime);
+                compressor.attack.setValueAtTime(0.003, audioContext.currentTime);
+                compressor.release.setValueAtTime(0.25, audioContext.currentTime);
 
-for(let i=0;i<18;i++){
-  const line = document.createElement("div");
-  line.className="line";
+                // --- ANALYSER (Untuk Visualizer) ---
+                const analyser = audioContext.createAnalyser();
+                analyser.fftSize = 256;
+                const bufferLength = analyser.frequencyBinCount;
+                const dataArray = new Uint8Array(bufferLength);
 
-  const top=Math.random()*100;
-  const dur=3+Math.random()*5;
-  const rot=(Math.random()*10-5).toFixed(2);
+                // Hubungkan: Mic -> Compressor -> Analyser -> Output
+                source.connect(compressor);
+                compressor.connect(analyser);
+                analyser.connect(audioContext.destination);
 
-  line.style.top=top+"%";
-  line.style.animationDuration=dur+"s";
-  line.style.setProperty("--rot", rot+"deg");
+                statusDiv.innerText = "COMPRESSOR: ON (LEVEL 6 READY)";
+                statusDiv.style.color = "#00ff00";
 
-  banner.appendChild(line);
-}
-</script>
+                function draw() {
+                    requestAnimationFrame(draw);
+                    analyser.getByteFrequencyData(dataArray);
+                    canvasCtx.clearRect(0, 0, canvas.width, canvas.height);
+                    
+                    let barWidth = (canvas.width / bufferLength) * 2.5;
+                    let x = 0;
 
+                    for(let i = 0; i < bufferLength; i++) {
+                        let barHeight = dataArray[i]/4;
+                        canvasCtx.fillStyle = `rgb(0, ${barHeight + 100}, 0)`;
+                        canvasCtx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
+                        x += barWidth + 1;
+                    }
+                }
+                draw();
+            } catch (err) {
+                statusDiv.innerText = "ERROR: " + err.message;
+            }
+        }
+
+        window.addEventListener('click', initAudio, { once: true });
+    </script>
 </body>
 </html>
